@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import GlobalStyles from 'GlobalStyles';
 import Statistics from '../Statistics';
 import Section from '../Section/Section';
@@ -12,35 +12,31 @@ export default function App() {
   const [bad, setBad] = useState(0);
 
   const options = { good, neutral, bad };
-
   const arrayOptions = Object.keys(options);
-
-  const totalCount = useRef(0);
-
-  const percentageOfPositiveFeedback = useRef(0);
 
   const handleClick = option => {
     switch (option) {
       case 'good':
-        setGood(good + 1);
+        setGood(prevGood => prevGood + 1);
         break;
       case 'neutral':
-        setNeutral(neutral + 1);
+        setNeutral(prevNeutral => prevNeutral + 1);
         break;
       case 'bad':
-        setBad(bad + 1);
+        setBad(prevBad => prevBad + 1);
         break;
       default:
         console.log('Invalid type of button');
     }
   };
 
-  useEffect(() => {
-    totalCount.current = good + neutral + bad;
-    percentageOfPositiveFeedback.current = Math.round(
-      (good * 100) / totalCount.current
-    );
-  }, [good, neutral, bad]);
+  const totalCount = () => {
+    return good + neutral + bad;
+  };
+
+  const percentageOfPositiveFeedback = () => {
+    return Math.round((good * 100) / totalCount());
+  };
 
   return (
     <Container>
@@ -49,13 +45,13 @@ export default function App() {
         <FeedbackOptions options={arrayOptions} onLeaveFeedback={handleClick} />
       </Section>
       <Section title="Statistics">
-        {totalCount.current > 0 ? (
+        {totalCount() ? (
           <Statistics
             good={good}
             neutral={neutral}
             bad={bad}
-            total={totalCount.current}
-            positivePercentage={percentageOfPositiveFeedback.current}
+            total={totalCount}
+            positivePercentage={percentageOfPositiveFeedback}
           />
         ) : (
           <Notification message="There is no feedback" />
