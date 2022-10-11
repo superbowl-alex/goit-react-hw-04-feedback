@@ -2,9 +2,9 @@ import PropTypes from 'prop-types';
 import { Button } from './FeedbackOptions.styled';
 
 const FeedbackOptions = ({ options, onLeaveFeedback }) => {
-  return options.map(key => (
-    <Button key={key} onClick={() => onLeaveFeedback(key)}>
-      {key}
+  return options.map(option => (
+    <Button key={option} onClick={() => onLeaveFeedback(option)}>
+      {option}
     </Button>
   ));
 };

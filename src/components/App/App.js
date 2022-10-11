@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import GlobalStyles from 'GlobalStyles';
 import Statistics from '../Statistics';
 import Section from '../Section/Section';
@@ -6,60 +6,61 @@ import FeedbackOptions from '../FeedbackOptions';
 import Notification from '../NotificationComponent';
 import { Container } from './App.styled';
 
-export default class App extends Component {
-  state = {
-    good: 0,
-    neutral: 0,
-    bad: 0,
+export default function App() {
+  const [good, setGood] = useState(0);
+  const [neutral, setNeutral] = useState(0);
+  const [bad, setBad] = useState(0);
+
+  const options = { good, neutral, bad };
+
+  const arrayOptions = Object.keys(options);
+
+  const totalCount = useRef(0);
+
+  const percentageOfPositiveFeedback = useRef(0);
+
+  const handleClick = option => {
+    switch (option) {
+      case 'good':
+        setGood(good + 1);
+        break;
+      case 'neutral':
+        setNeutral(neutral + 1);
+        break;
+      case 'bad':
+        setBad(bad + 1);
+        break;
+      default:
+        console.log('Invalid type of button');
+    }
   };
 
-  keysOfState = Object.keys(this.state);
-
-  handleClick = key => {
-    this.setState(prevState => {
-      return { [key]: prevState[key] + 1 };
-    });
-  };
-
-  countTotalFeedback = () => {
-    const count = this.keysOfState.reduce((total, key) => {
-      return total + this.state[key];
-    }, 0);
-    return count;
-  };
-
-  countPositiveFeedbackPercentage = () => {
-    const percentageOfPositiveFeedback = Math.round(
-      (this.state['good'] * 100) / this.countTotalFeedback()
+  useEffect(() => {
+    totalCount.current = good + neutral + bad;
+    percentageOfPositiveFeedback.current = Math.round(
+      (good * 100) / totalCount.current
     );
-    return percentageOfPositiveFeedback || 0;
-  };
+  }, [good, neutral, bad]);
 
-  render() {
-    const { good, neutral, bad } = this.state;
-    return (
-      <Container>
-        <GlobalStyles />
-        <Section title="Please leave feedback">
-          <FeedbackOptions
-            options={this.keysOfState}
-            onLeaveFeedback={this.handleClick}
+  return (
+    <Container>
+      <GlobalStyles />
+      <Section title="Please leave feedback">
+        <FeedbackOptions options={arrayOptions} onLeaveFeedback={handleClick} />
+      </Section>
+      <Section title="Statistics">
+        {totalCount.current > 0 ? (
+          <Statistics
+            good={good}
+            neutral={neutral}
+            bad={bad}
+            total={totalCount.current}
+            positivePercentage={percentageOfPositiveFeedback.current}
           />
-        </Section>
-        <Section title="Statistics">
-          {this.countTotalFeedback() ? (
-            <Statistics
-              good={good}
-              neutral={neutral}
-              bad={bad}
-              total={this.countTotalFeedback}
-              positivePercentage={this.countPositiveFeedbackPercentage}
-            />
-          ) : (
-            <Notification message="There is no feedback" />
-          )}
-        </Section>
-      </Container>
-    );
-  }
+        ) : (
+          <Notification message="There is no feedback" />
+        )}
+      </Section>
+    </Container>
+  );
 }
